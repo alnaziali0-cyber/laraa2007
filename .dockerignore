@@ -1,0 +1,14 @@
+.git
+.env
+.env.*
+private-data
+.venv
+__pycache__
+*.py[cod]
+.pytest_cache
+tests
+*.zip
+README.md
+.gitignore
+.dockerignore
+docker-compose.yml

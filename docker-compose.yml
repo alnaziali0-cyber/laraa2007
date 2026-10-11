@@ -1,0 +1,54 @@
+services:
+  panel:
+    build:
+      context: .
+      args:
+        INSTALL_DOCKER_CLI: "false"
+    restart: unless-stopped
+    env_file: .env
+    environment:
+      HOSTPANEL_DATA_DIR: ${HOSTPANEL_DATA_DIR}
+      RUNNER_API_URL: http://runner:8091
+      RUNNER_BUILD_NETWORK: ${RUNNER_BUILD_NETWORK:-none}
+    ports:
+      - "127.0.0.1:8000:8000"
+    volumes:
+      - ${HOSTPANEL_DATA_DIR}:${HOSTPANEL_DATA_DIR}
+    networks: [frontend, runner-net]
+    read_only: true
+    tmpfs:
+      - /tmp:rw,noexec,nosuid,size=32m
+    security_opt: [no-new-privileges:true]
+    cap_drop: [ALL]
+    depends_on:
+      runner:
+        condition: service_healthy
+  runner:
+    build:
+      context: .
+      args:
+        INSTALL_DOCKER_CLI: "true"
+    command: ["uvicorn", "runner_worker:app", "--host", "0.0.0.0", "--port", "8091"]
+    restart: unless-stopped
+    environment:
+      RUNNER_TOKEN: ${RUNNER_TOKEN}
+      RUNNER_IMAGE: ${RUNNER_IMAGE:-python:3.12-slim}
+      HOSTPANEL_DATA_DIR: ${HOSTPANEL_DATA_DIR}
+    volumes:
+      - /var/run/docker.sock:/var/run/docker.sock
+    networks: [runner-net]
+    user: root
+    read_only: true
+    tmpfs:
+      - /tmp:rw,noexec,nosuid,size=16m
+    security_opt: [no-new-privileges:true]
+    cap_drop: [ALL]
+    healthcheck:
+      test: ["CMD", "python", "-c", "import urllib.request; urllib.request.urlopen('http://127.0.0.1:8091/health', timeout=3)"]
+      interval: 15s
+      timeout: 5s
+      retries: 3
+networks:
+  frontend: {}
+  runner-net:
+    internal: true
