@@ -24,6 +24,8 @@
 
 ## التثبيت على خادم Linux
 
+لخطوات Ubuntu 24.04 المفصلة على جهازك الدائم، بما فيها DNS وHTTPS وSMTP وDocker، راجع [دليل النشر الذاتي بالعربية](DEPLOY_HOME_AR.md).
+
 المتطلبات: Docker Engine + Compose plugin، خادم Linux مخصص، مساحة بيانات host ثابتة، اسم نطاق وHTTPS أمام اللوحة. Compose يربط Docker socket **بخدمة runner فقط**؛ لا تستخدمه على جهاز مشترك متعدد المستأجرين دون عزل مضيف مناسب.
 
 ```bash
